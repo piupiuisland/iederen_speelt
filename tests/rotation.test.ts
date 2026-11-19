@@ -17,7 +17,7 @@ describe("rotation templates", () => {
           if (present === onField) expect(t).toBeNull();
           else {
             expect(t, `${present}/${onField}/${matchMin}`).not.toBeNull();
-            expect(t!.intervalMin).toBeGreaterThanOrEqual(4);
+            expect(t!.intervalMin).toBeGreaterThanOrEqual(5); // not more often than every 5 minutes
             expect(t!.intervalMin).toBeLessThanOrEqual(8); // nobody waits longer than 8 minutes
             expect(t!.swapsPerSub).toBeLessThanOrEqual(present - onField);
           }
@@ -27,6 +27,7 @@ describe("rotation templates", () => {
   it("knows the cases discussed: 7 children, 5 on the field, 20 min → every 8 min, 2 at a time", () => {
     expect(rotationTemplate(7, 5, 20)).toMatchObject({ intervalMin: 8, swapsPerSub: 2 });
     expect(rotationTemplate(6, 4, 20)).toMatchObject({ intervalMin: 7, swapsPerSub: 2 });
+    expect(rotationTemplate(5, 4, 20)).toMatchObject({ intervalMin: 6, swapsPerSub: 1 });
   });
 
   it("falls back to the closest template for unusual situations", () => {

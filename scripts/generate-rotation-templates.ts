@@ -2,8 +2,8 @@
 // Run: npm run templates   (rewrites src/domain/engine/rotationTemplates.data.ts)
 //
 // For each (children present, players on the field, match length) we simulate a
-// day of 3 matches with a "perfect parent" for every swap interval (4–8 min:
-// children shouldn't wait longer than 8 minutes on the bench) and every number
+// day of 3 matches with a "perfect parent" for every swap interval (5–8 min)
+// and every number
 // of children per swap, then pick the best by:
 //   cost = playing-time difference (min) + 2 × swap moments per match
 // Ties: fewer swaps, then swap moments spread evenly over the match, then the
@@ -15,7 +15,9 @@ import { simulateMatchDay } from "../src/domain/simulate.ts";
 const PRESENT = [5, 6, 7, 8];
 const ON_FIELD = [4, 5, 6];
 const LENGTHS = [20, 30, 40];
-const INTERVALS = [4, 5, 6, 7, 8];
+// At least 5 min between swaps (more often is too hectic for young children),
+// at most 8 min waiting on the bench.
+const INTERVALS = [5, 6, 7, 8];
 const MATCHES = 3;
 
 interface Row {
