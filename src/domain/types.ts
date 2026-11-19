@@ -51,6 +51,9 @@ export interface Match {
   startingPlayerIds: PlayerId[];
   /** Players on the field for this match (e.g. 4, 5 or 6). Missing: the match day's default. */
   playersOnField?: number;
+  /** Substitution rhythm for this match. Missing: the match day's settings. */
+  reminderIntervalMs?: Ms;
+  maxSubsPerReminder?: number;
   /** The other club, if the parent typed it. Empty or missing: shown as "Tegenstander". */
   opponentName?: string;
   /** Append-only. Match status and all statistics are derived from this log. */

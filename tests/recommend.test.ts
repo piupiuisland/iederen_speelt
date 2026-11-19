@@ -43,7 +43,7 @@ describe("recommend", () => {
   });
 
   it("flags players over the max stint", () => {
-    const day = startedDay(6, [20], { maxStintMs: min(5) });
+    const day = startedDay(6, [20], { maxStintMs: min(5), reminderIntervalMs: min(2) });
     expect(rec(day, at(6)).map((p) => p.reason)).toEqual(["max-stint", "max-stint"]);
   });
 

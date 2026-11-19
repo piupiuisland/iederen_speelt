@@ -40,6 +40,8 @@ export function LiveMatch() {
   const cur = state.current!;
   const running = cur.status === "running";
   const pairs = recommend(state, day.settings);
+  const canSub = state.players.some((p) => !cur.onFieldIds.includes(p.playerId) && p.availability === "available");
+  const subDue = cur.reminderDue && canSub;
   const nameOf = (id: string) => data.roster.players.find((p) => p.id === id)?.name ?? "?";
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -70,14 +72,14 @@ export function LiveMatch() {
   }, [running, actions]);
 
   // Buzz once when a reminder becomes due.
-  const wasDue = useRef(cur.reminderDue);
+  const wasDue = useRef(subDue);
   useEffect(() => {
-    if (cur.reminderDue && !wasDue.current && running) {
+    if (subDue && !wasDue.current && running) {
       vibrate([200, 100, 200]);
       beep();
     }
-    wasDue.current = cur.reminderDue;
-  }, [cur.reminderDue, running]);
+    wasDue.current = subDue;
+  }, [subDue, running]);
 
   // Hide the undo toast after a while.
   useEffect(() => {
@@ -186,8 +188,12 @@ export function LiveMatch() {
               +1′
             </button>
           </div>
-          <p className={`mt-1 font-semibold tabular-nums ${cur.reminderDue ? "text-blue-700" : "text-gray-500"}`}>
-            {cur.reminderDue ? "Sub time!" : `Next sub ${clock(cur.nextReminderInMs ?? 0)}`}
+          <p className={`mt-1 font-semibold tabular-nums ${subDue ? "text-blue-700" : "text-gray-500"}`}>
+            {!canSub
+              ? "No subs needed"
+              : subDue
+                ? "Sub time!"
+                : `Next sub ${clock(cur.nextReminderInMs ?? 0)} · ${cur.maxSubsPerReminder}×`}
           </p>
         </div>
       </div>
@@ -264,7 +270,7 @@ export function LiveMatch() {
       ) : (
         <Recommendation
           pairs={pairs}
-          due={cur.reminderDue}
+          due={subDue}
           nameOf={nameOf}
           onConfirm={() => doSub(pairs)}
           onLater={() => run((d, ctx) => respondToReminder(d, "snooze", ctx))}

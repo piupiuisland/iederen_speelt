@@ -31,6 +31,11 @@ export interface MatchState {
   number: number;
   /** Field size for this match. */
   playersOnField: number;
+  /** Substitution rhythm for this match. */
+  reminderIntervalMs: Ms;
+  maxSubsPerReminder: number;
+  /** Soft limit on a continuous stint: the settings value, but never below two reminder intervals. */
+  maxStintMs: Ms;
   opponentName: string;
   score: Score;
   status: MatchStatus;
@@ -86,6 +91,8 @@ export function effectiveSubs(match: Match): SubEvent[] {
   for (const e of match.events) if (e.type === "UNDO") undone.add(e.targetBatchId);
   return match.events.filter((e): e is SubEvent => e.type === "SUB" && !undone.has(e.batchId));
 }
+
+const intervalOf = (match: Match, settings: Settings): Ms => match.reminderIntervalMs ?? settings.reminderIntervalMs;
 
 export function scoreOf(match: Match): Score {
   const score = { us: 0, them: 0 };
@@ -146,6 +153,9 @@ function replayMatch(
     matchId: match.id,
     number,
     playersOnField: match.playersOnField ?? settings.playersOnField,
+    reminderIntervalMs: intervalOf(match, settings),
+    maxSubsPerReminder: match.maxSubsPerReminder ?? settings.maxSubsPerRecommendation,
+    maxStintMs: Math.max(settings.maxStintMs, 2 * intervalOf(match, settings)),
     opponentName: match.opponentName ?? "",
     score: scoreOf(match),
     status,
@@ -221,14 +231,15 @@ function replayMatch(
 
   // Reminder clock: counts active time since the last anchor (start, sub, skip, snooze).
   let anchorT = start.t;
-  let dueAfter = settings.reminderIntervalMs;
+  const interval = intervalOf(match, settings);
+  let dueAfter = interval;
   for (const e of match.events) {
     if (e.type === "SUB" && effectiveBatches.has(e.batchId)) {
       anchorT = e.t;
-      dueAfter = settings.reminderIntervalMs;
+      dueAfter = interval;
     } else if (e.type === "REMINDER") {
       anchorT = e.t;
-      dueAfter = e.action === "snooze" ? settings.snoozeMs : settings.reminderIntervalMs;
+      dueAfter = e.action === "snooze" ? settings.snoozeMs : interval;
     }
   }
   const live = status === "running" || status === "paused";

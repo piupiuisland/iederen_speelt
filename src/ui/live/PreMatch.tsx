@@ -1,13 +1,15 @@
-import { Check, Play } from "lucide-react";
+import { Check, Play, Sparkles } from "lucide-react";
 import { useState } from "react";
 import {
   removeMatch,
   setMatchPlayersOnField,
+  setMatchRotation,
   setOpponentName,
   setPlannedDuration,
   startMatch,
 } from "../../domain/commands.ts";
 import { recommendStartingLineup } from "../../domain/engine/lineup.ts";
+import { rotationTemplate } from "../../domain/engine/rotation.ts";
 import { replay } from "../../domain/projection.ts";
 import { MINUTE } from "../../domain/settings.ts";
 import { primeAudio } from "../../platform/device.ts";
@@ -28,7 +30,7 @@ export function PreMatch({ matchId }: { matchId: string }) {
   const nameOf = (id: string) => data.roster.players.find((p) => p.id === id)?.name ?? "?";
 
   // Rotate the first match's suggestion each match day so the same children don't always start.
-  const rotation = data.history.length * day.settings.playersOnField;
+  const lineupOffset = data.history.length * day.settings.playersOnField;
   // Field size: this match's choice, else the previous match's, else the match-day default.
   const previous = state.matches.filter((m) => m.status !== "ready").at(-1);
   const fieldSize =
@@ -36,7 +38,7 @@ export function PreMatch({ matchId }: { matchId: string }) {
 
   const [opponent, setOpponent] = useState(match.opponentName);
   const [lineup, setLineup] = useState<string[]>(() =>
-    match.startingPlayerIds.length > 0 ? match.startingPlayerIds : recommendStartingLineup(day, Date.now(), rotation, fieldSize),
+    match.startingPlayerIds.length > 0 ? match.startingPlayerIds : recommendStartingLineup(day, Date.now(), lineupOffset, fieldSize),
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -51,12 +53,23 @@ export function PreMatch({ matchId }: { matchId: string }) {
     if (err) return;
     const need = requiredFor(size);
     if (lineup.length >= need) return setLineup(lineup.slice(0, need));
-    const extra = recommendStartingLineup(day, Date.now(), rotation, size).filter((id) => !lineup.includes(id));
+    const extra = recommendStartingLineup(day, Date.now(), lineupOffset, size).filter((id) => !lineup.includes(id));
     setLineup([...lineup, ...extra].slice(0, need));
   };
   const minutes = match.plannedDurationMs / MINUTE;
   const setMinutes = (m: number) =>
     setError(actions.runDay((d, ctx) => setPlannedDuration(d, matchId, m * MINUTE, ctx)));
+
+  // Substitution rhythm: the built-in template for today's situation unless the parent changes it.
+  const bench = available.length - fieldSize;
+  const template = rotationTemplate(available.length, fieldSize, minutes);
+  const [custom, setCustom] = useState<{ intervalMin: number; swaps: number } | null>(null);
+  const rotation = custom ??
+    (template
+      ? { intervalMin: template.intervalMin, swaps: template.swapsPerSub }
+      : { intervalMin: Math.round(day.settings.reminderIntervalMs / MINUTE), swaps: Math.max(1, Math.min(2, bench)) });
+  const swaps = Math.max(1, Math.min(rotation.swaps, Math.max(1, bench)));
+  const isTemplate = !!template && template.intervalMin === rotation.intervalMin && template.swapsPerSub === swaps;
 
   const toggle = (id: string) => {
     setError(null);
@@ -71,7 +84,13 @@ export function PreMatch({ matchId }: { matchId: string }) {
       actions.runDay((d, ctx) => {
         const named = opponent !== match.opponentName ? setOpponentName(d, matchId, opponent, ctx) : d;
         const sized = setMatchPlayersOnField(named, matchId, fieldSize, ctx);
-        return startMatch(sized, matchId, ctx, lineup);
+        const paced = setMatchRotation(
+          sized,
+          matchId,
+          { reminderIntervalMs: rotation.intervalMin * MINUTE, maxSubsPerReminder: swaps },
+          ctx,
+        );
+        return startMatch(paced, matchId, ctx, lineup);
       }),
     );
   };
@@ -110,6 +129,51 @@ export function PreMatch({ matchId }: { matchId: string }) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-gray-200 px-4 py-2" aria-label="Substitutions">
+        <h2 className="pt-1 font-bold">Substitutions</h2>
+        {bench < 1 ? (
+          <p className="py-2 text-sm text-gray-600">Everyone plays the whole match — no substitutions needed.</p>
+        ) : (
+          <>
+            <Stepper
+              label="Swap every"
+              unit="min"
+              value={rotation.intervalMin}
+              min={2}
+              max={20}
+              onChange={(v) => setCustom({ intervalMin: v, swaps })}
+            />
+            <Stepper
+              label="Children per swap"
+              value={swaps}
+              min={1}
+              max={bench}
+              onChange={(v) => setCustom({ intervalMin: rotation.intervalMin, swaps: v })}
+            />
+            {template && (
+              <div className={`mb-2 flex items-start gap-2 rounded-xl p-3 text-sm ${isTemplate ? "bg-green-50 text-green-900" : "bg-gray-50 text-gray-700"}`}>
+                <Sparkles size={16} className="mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p>
+                    {isTemplate ? "Recommended" : "Recommended"} for {available.length} children, {fieldSize} on the field,{" "}
+                    {minutes} min: <b>every {template.intervalMin} min, {template.swapsPerSub} at a time</b>.
+                  </p>
+                  <p className="text-xs opacity-75">
+                    About {template.swapMomentsPerMatch} swap moments per match · expected difference {template.differenceMin} min
+                    over 3 matches.
+                  </p>
+                  {!isTemplate && (
+                    <button type="button" onClick={() => setCustom(null)} className="mt-1 font-bold text-green-800 underline">
+                      Use recommended
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div>

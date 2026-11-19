@@ -172,6 +172,22 @@ export function setMatchPlayersOnField(day: MatchDay, matchId: string, count: nu
   return updateMatch(day, matchId, ctx, (m) => ({ ...m, playersOnField: count }));
 }
 
+/** Substitution rhythm for one match (e.g. from a rotation template). Only before kick-off. */
+export function setMatchRotation(
+  day: MatchDay,
+  matchId: string,
+  rotation: { reminderIntervalMs: Ms; maxSubsPerReminder: number },
+  ctx: Ctx,
+): MatchDay {
+  ensureOpen(day);
+  if (!(Number.isFinite(rotation.reminderIntervalMs) && rotation.reminderIntervalMs >= 60_000))
+    fail("Substitutions must be at least 1 minute apart.");
+  if (!Number.isInteger(rotation.maxSubsPerReminder) || rotation.maxSubsPerReminder < 1)
+    fail("At least 1 player per substitution.");
+  if (matchStatus(findMatch(day, matchId)) !== "ready") fail("The match has already started.");
+  return updateMatch(day, matchId, ctx, (m) => ({ ...m, ...rotation }));
+}
+
 /** Before kick-off this edits the plan; during a match it is recorded as an event. */
 export function setPlannedDuration(day: MatchDay, matchId: string, durationMs: Ms, ctx: Ctx): MatchDay {
   ensureOpen(day);

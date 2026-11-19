@@ -38,7 +38,7 @@ export function recommend(state: MatchDayState, settings: Settings): SubPair[] {
   const match = state.current;
   if (!match) return [];
 
-  const max = settings.maxSubsPerRecommendation;
+  const max = match.maxSubsPerReminder;
   const onField = new Set(match.onFieldIds);
   const field = match.onFieldIds.map((id) => state.byId[id]!);
   const ins = state.players
@@ -72,7 +72,7 @@ export function recommend(state: MatchDayState, settings: Settings): SubPair[] {
 
   // 3. Max stint, then rotation.
   const finalMinute = match.remainingMs > 0 && match.remainingMs < FINAL_MINUTE_MS;
-  const overMax = (p: PlayerStats) => p.stintMs >= settings.maxStintMs;
+  const overMax = (p: PlayerStats) => p.stintMs >= match.maxStintMs;
   const outs = field
     .filter((p) => p.availability === "available" && (overMax(p) || p.stintMs >= settings.minStintMs))
     .sort((a, b) => Number(overMax(b)) - Number(overMax(a)) || byMostPlayed(a, b));

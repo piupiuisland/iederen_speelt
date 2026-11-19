@@ -109,14 +109,7 @@ export function SetupScreen() {
             </button>
           ))}
         </div>
-        <Stepper
-          label="Sub reminder every"
-          unit="min"
-          value={prefs.reminderIntervalMin}
-          min={1}
-          max={15}
-          onChange={set("reminderIntervalMin")}
-        />
+        <p className="pb-2 text-xs text-gray-500">How often to swap is suggested for each match, based on who's here.</p>
       </div>
 
       {playing > 0 && playing < prefs.playersOnField && (

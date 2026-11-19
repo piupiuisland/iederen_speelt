@@ -194,3 +194,40 @@ describe("live match", () => {
     expect(screen.getByLabelText("Match clock").textContent).toMatch(/^0(0:5\d|1:0\d)$/);
   });
 });
+
+describe("substitution templates", () => {
+  it("suggests the rhythm for today's situation and applies it at kick-off", async () => {
+    const { user, dbName } = await renderApp();
+    await user.click(screen.getByRole("button", { name: /Start match day/ }));
+    await screen.findByRole("heading", { name: "Match 1 of 4" });
+    const subs = within(screen.getByLabelText("Substitutions"));
+    // 7 children, 4 on the field, 20 min.
+    expect(subs.getByText(/every 8 min, 2 at a time/)).toBeInTheDocument();
+    expect(subs.getByRole("status", { name: "Swap every" })).toHaveTextContent("8");
+    expect(subs.getByRole("status", { name: "Children per swap" })).toHaveTextContent("2");
+
+    // Parent changes it, then goes back to the recommendation.
+    await user.click(subs.getByRole("button", { name: "Decrease Swap every" }));
+    expect(subs.getByRole("status", { name: "Swap every" })).toHaveTextContent("7");
+    await user.click(subs.getByRole("button", { name: "Use recommended" }));
+    expect(subs.getByRole("status", { name: "Swap every" })).toHaveTextContent("8");
+
+    await user.click(screen.getByRole("button", { name: /Kick off/ }));
+    expect(await screen.findByText(/Next sub 0[78]:\d\d · 2×/)).toBeInTheDocument();
+    await waitFor(async () => {
+      const m = (await readDb(dbName, (r) => r.getActiveMatchDay()))!.matches[0]!;
+      expect(m.reminderIntervalMs).toBe(8 * MINUTE);
+      expect(m.maxSubsPerReminder).toBe(2);
+    });
+  });
+
+  it("needs no substitutions when everyone fits on the field", async () => {
+    const { user } = await renderApp();
+    for (const n of ["Ava", "Ben", "Daan"]) await user.click(screen.getByRole("button", { name: new RegExp(`^${n}:`) }));
+    await user.click(screen.getByRole("button", { name: /Start match day/ }));
+    await screen.findByRole("heading", { name: "Match 1 of 4" });
+    expect(screen.getByText(/no substitutions needed/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Kick off/ }));
+    expect(await screen.findByText("No subs needed")).toBeInTheDocument();
+  });
+});
