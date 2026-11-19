@@ -64,12 +64,10 @@ describe("Team screen", () => {
 });
 
 describe("first launch", () => {
-  it("starts with an empty team and points to the Team tab", async () => {
+  it("starts with the team, sorted alphabetically", async () => {
     const { user } = await renderApp(undefined, { seedTeam: false });
-    expect(screen.getByText("Add players in the Team tab first.")).toBeInTheDocument();
+    expect(screen.getByText("7 of 7 playing")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Team" }));
-    expect(screen.getByText("No players yet.")).toBeInTheDocument();
-    await user.type(screen.getByRole("textbox", { name: "New player name" }), "Ava{Enter}");
-    expect(visibleNames()).toEqual(["Ava"]);
+    expect(visibleNames()).toEqual(["Aanurakti", "Arvid", "Jonah", "Nina", "Rico", "Ronnie", "Sep"]);
   });
 });

@@ -17,7 +17,8 @@ on the sideline give every child fair playing time.
 
 1. Open the app's address in **Safari** (iPhone) or **Chrome** (Android).
 2. iPhone: **Share → Add to Home Screen**. Android: menu **⋮ → Install app**.
-3. Open it from the home screen, go to the **Team** tab and add your players.
+3. Open it from the home screen. The team is already there; add, rename or remove
+   players in the **Team** tab.
 
 Use it from the home-screen icon: Safari may clear data of websites that are not
 added to the home screen after 7 days without use.

@@ -1,11 +1,8 @@
 import { createMatchDay, DomainError, randomId, type CreateMatchDayInput, type Ctx } from "./commands.ts";
 import type { MatchDay, Player, PlayerId } from "./types.ts";
 
-/**
- * Players seeded on first launch. Deliberately empty: children's names are
- * entered on the device (Team tab) and never stored in this public code.
- */
-export const DEFAULT_TEAM_NAMES: readonly string[] = [];
+/** The team, seeded on first launch (first names only). Editable afterwards in the Team tab. */
+export const DEFAULT_TEAM_NAMES: readonly string[] = ["Jonah", "Sep", "Ronnie", "Nina", "Rico", "Aanurakti", "Arvid"];
 
 export const DEFAULT_TEAM_NAME = "Best Vooruit";
 

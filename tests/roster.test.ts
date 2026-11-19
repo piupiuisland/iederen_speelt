@@ -19,8 +19,8 @@ const ids = () => {
 const names = (r: ReturnType<typeof createRoster>) => activePlayers(r).map((p) => p.name);
 
 describe("roster", () => {
-  it("starts empty: children's names are never stored in the code", () => {
-    expect(names(createRoster())).toEqual([]);
+  it("seeds the team alphabetically on first launch", () => {
+    expect(names(createRoster())).toEqual(["Aanurakti", "Arvid", "Jonah", "Nina", "Rico", "Ronnie", "Sep"]);
   });
 
   it("sorts the team alphabetically", () => {
