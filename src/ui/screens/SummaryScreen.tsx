@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { summarizeMatchDay } from "../../domain/engine/summary.ts";
 import { teamNameOf } from "../../domain/roster.ts";
 import { MINUTE } from "../../domain/settings.ts";
@@ -13,6 +14,7 @@ export function SummaryScreen({ dayId }: { dayId: string }) {
   const { data, actions } = useReadyStore();
   const day = data.history.find((d) => d.id === dayId);
   const summary = useMemo(() => (day ? summarizeMatchDay(day) : null), [day]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   if (!day || !summary) return null;
 
   const nameOf = (id: string) => data.roster.players.find((p) => p.id === id)?.name ?? "?";
@@ -119,6 +121,34 @@ export function SummaryScreen({ dayId }: { dayId: string }) {
       >
         Done
       </button>
+
+      {confirmDelete ? (
+        <div className="space-y-2 rounded-xl bg-red-50 p-3">
+          <p className="text-sm font-semibold text-red-900">
+            Delete the match day of {formatDate(day.date)}? This can't be undone.
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => actions.deleteMatchDay(day.id)}
+              className="h-12 flex-1 rounded-xl bg-red-600 font-bold text-white active:bg-red-700"
+            >
+              Yes, delete
+            </button>
+            <button type="button" onClick={() => setConfirmDelete(false)} className="h-12 rounded-xl bg-white px-5 font-semibold">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirmDelete(true)}
+          className="flex h-12 w-full items-center justify-center gap-2 text-sm font-semibold text-red-700"
+        >
+          <Trash2 size={16} /> Delete this match day
+        </button>
+      )}
     </section>
   );
 }

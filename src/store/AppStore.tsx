@@ -49,6 +49,8 @@ export interface AppActions {
   dismissInterruption(): void;
   openSummary(dayId: string): void;
   closeSummary(): void;
+  /** Permanently remove a finished match day from history (e.g. a test run). */
+  deleteMatchDay(dayId: string): void;
   /** Don't count the interruption as playing time. */
   excludeInterruption(): string | null;
   startMatchDay(input: { absentIds: ReadonlySet<PlayerId>; prefs: SetupPrefs; date: string }): string | null;
@@ -209,6 +211,19 @@ export function AppStoreProvider({
 
       closeSummary() {
         show({ ...current(), summaryDayId: null });
+      },
+
+      deleteMatchDay(dayId) {
+        const d = current();
+        if (d.activeDay?.id === dayId) return; // only finished days live in history
+        commit(
+          {
+            ...d,
+            history: d.history.filter((h) => h.id !== dayId),
+            summaryDayId: d.summaryDayId === dayId ? null : d.summaryDayId,
+          },
+          (repo) => repo.deleteMatchDay(dayId),
+        );
       },
 
       excludeInterruption() {

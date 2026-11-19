@@ -149,7 +149,14 @@ export function SetupScreen() {
                 onClick={() => actions.openSummary(d.id)}
                 className="flex h-12 w-full items-center justify-between rounded-xl bg-gray-50 px-4 text-left active:bg-gray-100"
               >
-                <span className="font-semibold">{formatDate(d.date)}</span>
+                <span className="font-semibold">
+                  {formatDate(d.date)}
+                  {d.finishedAt !== undefined && (
+                    <span className="ml-1.5 font-normal text-gray-500">
+                      {new Date(d.finishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  )}
+                </span>
                 <span className="text-sm text-gray-600">
                   {played} {played === 1 ? "match" : "matches"} · {d.playerIds.length} players
                 </span>

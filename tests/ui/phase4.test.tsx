@@ -76,3 +76,30 @@ describe("summary and history", () => {
     expect(starters.sort()).toEqual(["Ava", "Finn", "Lars", "Noah"]);
   });
 });
+
+describe("deleting a match day", () => {
+  it("removes a test run from history after confirmation, also after reload", async () => {
+    const { user, dbName, unmount } = await renderApp();
+    for (let i = 0; i < 2; i++) {
+      await startDay(user);
+      await user.click(screen.getByRole("button", { name: "End match day" }));
+      await user.click(screen.getByRole("button", { name: "Yes, end match day" }));
+      await user.click(await screen.findByRole("button", { name: "Done" }));
+    }
+    const rows = () => screen.queryAllByRole("button", { name: /0 matches · 7 players/ });
+    expect(rows()).toHaveLength(2);
+
+    await user.click(rows()[0]!);
+    await user.click(screen.getByRole("button", { name: /Delete this match day/ }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: /Delete this match day/ }));
+    await user.click(screen.getByRole("button", { name: "Yes, delete" }));
+
+    expect(await screen.findByRole("heading", { name: "Who's playing today?" })).toBeInTheDocument();
+    expect(rows()).toHaveLength(1);
+
+    unmount();
+    await renderApp(dbName);
+    expect(rows()).toHaveLength(1);
+  });
+});

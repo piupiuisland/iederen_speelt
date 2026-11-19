@@ -22,6 +22,7 @@ export interface Repo {
   getActiveMatchDay(): Promise<MatchDay | null>;
   listMatchDays(): Promise<MatchDay[]>;
   saveMatchDay(day: MatchDay): Promise<void>;
+  deleteMatchDay(id: string): Promise<void>;
   /** Atomically: store the new day, mark it active, remember the setup. */
   startMatchDay(day: MatchDay, prefs: SetupPrefs): Promise<void>;
   /** Atomically: store the finished day and clear the active pointer. */
@@ -53,6 +54,9 @@ export async function openRepo(name: string = DB_NAME): Promise<Repo> {
     listMatchDays: () => db.getAll("matchDays"),
     async saveMatchDay(day) {
       await db.put("matchDays", day);
+    },
+    async deleteMatchDay(id) {
+      await db.delete("matchDays", id);
     },
     async startMatchDay(day, prefs) {
       const tx = db.transaction(["kv", "matchDays"], "readwrite");
