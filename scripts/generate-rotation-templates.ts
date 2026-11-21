@@ -18,6 +18,9 @@ const LENGTHS = [15, 20, 30, 40];
 // At least 5 min between swaps (more often is too hectic for young children),
 // at most 8 min waiting on the bench.
 const INTERVALS = [5, 6, 7, 8];
+// Fixed by the coach: 15′ → every 5 (swaps at 6′ and 11′), 20′ → every 8 (8′ and 16′).
+// Only the number of children per swap is optimised for these lengths.
+const FIXED_INTERVAL: Record<number, number> = { 15: 5, 20: 8 };
 const MATCHES = 3;
 
 interface Row {
@@ -37,7 +40,7 @@ for (const present of PRESENT)
     if (bench < 1) continue;
     for (const matchMin of LENGTHS) {
       const candidates: (Row & { cost: number; unevenness: number; swapsPerMatch: number })[] = [];
-      for (const intervalMin of INTERVALS)
+      for (const intervalMin of FIXED_INTERVAL[matchMin] ? [FIXED_INTERVAL[matchMin]] : INTERVALS)
         for (let swapsPerSub = 1; swapsPerSub <= Math.min(bench, 4); swapsPerSub++) {
           const r = simulateMatchDay({
             playerCount: present,
