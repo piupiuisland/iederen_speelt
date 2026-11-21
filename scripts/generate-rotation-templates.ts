@@ -6,15 +6,15 @@
 // and every number
 // of children per swap, then pick the best by:
 //   cost = playing-time difference (min) + 2 × swap moments per match
-// Ties: fewer swaps, then swap moments spread evenly over the match, then the
-// longer interval.
+// Ties: fewer swaps, then the most even stretches between swaps, then the
+// longer interval. Swap times follow plannedSubTimes (first ≥ 6′, none in the last 4′).
 import { writeFileSync } from "node:fs";
-import { MINUTE } from "../src/domain/settings.ts";
+import { MINUTE, plannedSubTimes } from "../src/domain/settings.ts";
 import { simulateMatchDay } from "../src/domain/simulate.ts";
 
 const PRESENT = [5, 6, 7, 8];
 const ON_FIELD = [4, 5, 6];
-const LENGTHS = [20, 30, 40];
+const LENGTHS = [15, 20, 30, 40];
 // At least 5 min between swaps (more often is too hectic for young children),
 // at most 8 min waiting on the bench.
 const INTERVALS = [5, 6, 7, 8];
@@ -46,7 +46,8 @@ for (const present of PRESENT)
           });
           const moments = new Set(r.substitutions.map((s) => `${s.matchNumber}:${s.elapsedMs}`)).size / MATCHES;
           const differenceMin = Math.round(r.fairness.rangeMs / MINUTE);
-          const segments = Math.floor((matchMin - 1) / intervalMin) + 1;
+          const cuts = [0, ...plannedSubTimes(matchMin * MINUTE, intervalMin * MINUTE), matchMin * MINUTE];
+          const segments = cuts.slice(1).map((t, i) => (t - cuts[i]!) / MINUTE);
           candidates.push({
             present,
             onField,
@@ -57,7 +58,7 @@ for (const present of PRESENT)
             swapMomentsPerMatch: Math.round(moments * 10) / 10,
             cost: differenceMin + 2 * moments,
             swapsPerMatch: r.substitutions.length / MATCHES,
-            unevenness: Math.abs(matchMin / segments - intervalMin),
+            unevenness: Math.max(...segments) - Math.min(...segments),
           });
         }
       candidates.sort(

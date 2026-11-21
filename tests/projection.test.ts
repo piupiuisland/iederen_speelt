@@ -11,6 +11,7 @@ import {
   undoLastSubstitution,
 } from "../src/domain/commands.ts";
 import { replay } from "../src/domain/projection.ts";
+import { MINUTE, plannedSubTimes } from "../src/domain/settings.ts";
 import { at, c, min, newDay, startedDay } from "./fixtures.ts";
 
 const sumTotals = (day: ReturnType<typeof startedDay>, now: number) =>
@@ -135,17 +136,37 @@ describe("substitutions", () => {
 });
 
 describe("reminder clock", () => {
-  it("counts down active time from kick-off", () => {
-    const day = startedDay();
-    expect(replay(day, at(3, 59)).current!.nextReminderInMs).toBe(1000);
-    expect(replay(day, at(3, 59)).current!.reminderDue).toBe(false);
-    expect(replay(day, at(4)).current!.reminderDue).toBe(true);
+  it("counts down active time from kick-off; the first swap waits at least 6 minutes", () => {
+    const day = startedDay(); // interval 4 min
+    expect(replay(day, at(5, 59)).current!.nextReminderInMs).toBe(1000);
+    expect(replay(day, at(5, 59)).current!.reminderDue).toBe(false);
+    expect(replay(day, at(6)).current!.reminderDue).toBe(true);
+  });
+
+  it("gives no reminder in the last 4 minutes", () => {
+    // 20 min, every 4: 6′, 10′, 14′ — 18′ would leave only 2 minutes.
+    let day = startedDay();
+    for (const m of [6, 10, 14]) {
+      expect(replay(day, at(m)).current!.reminderDue).toBe(true);
+      day = respondToReminder(day, "skip", c(m));
+    }
+    expect(replay(day, at(14, 1)).current!.nextReminderInMs).toBeNull();
+    expect(replay(day, at(19)).current!.reminderDue).toBe(false);
+  });
+
+  it("plans swap times: first ≥ 6′, then every interval, none in the last 4′", () => {
+    const times = (len: number, every: number) => plannedSubTimes(min(len), min(every)).map((t) => t / MINUTE);
+    expect(times(15, 5)).toEqual([6, 11]);
+    expect(times(15, 7)).toEqual([7]);
+    expect(times(20, 7)).toEqual([7, 14]);
+    expect(times(20, 8)).toEqual([8, 16]);
+    expect(times(40, 8)).toEqual([8, 16, 24, 32]);
   });
 
   it("stops while paused", () => {
     let day = pauseMatch(startedDay(), c(2));
     day = resumeMatch(day, c(5));
-    expect(replay(day, at(6)).current!.nextReminderInMs).toBe(min(1));
+    expect(replay(day, at(6)).current!.nextReminderInMs).toBe(min(3));
   });
 
   it("restarts after a substitution, skip, or snooze", () => {

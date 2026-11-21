@@ -193,7 +193,9 @@ export function LiveMatch() {
               ? "No subs needed"
               : subDue
                 ? "Sub time!"
-                : `Next sub ${clock(cur.nextReminderInMs ?? 0)} · ${cur.maxSubsPerReminder}×`}
+                : cur.nextReminderInMs === null
+                  ? "No more planned subs"
+                  : `Next sub ${clock(cur.nextReminderInMs)} · ${cur.maxSubsPerReminder}×`}
           </p>
         </div>
       </div>

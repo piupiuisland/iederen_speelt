@@ -6,11 +6,20 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
   {
     "present": 5,
     "onField": 4,
+    "matchMin": 15,
+    "intervalMin": 8,
+    "swapsPerSub": 1,
+    "differenceMin": 7,
+    "swapMomentsPerMatch": 1
+  },
+  {
+    "present": 5,
+    "onField": 4,
     "matchMin": 20,
     "intervalMin": 6,
     "swapsPerSub": 1,
-    "differenceMin": 4,
-    "swapMomentsPerMatch": 3
+    "differenceMin": 6,
+    "swapMomentsPerMatch": 2
   },
   {
     "present": 5,
@@ -29,6 +38,15 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "swapsPerSub": 1,
     "differenceMin": 0,
     "swapMomentsPerMatch": 4
+  },
+  {
+    "present": 6,
+    "onField": 4,
+    "matchMin": 15,
+    "intervalMin": 8,
+    "swapsPerSub": 2,
+    "differenceMin": 2,
+    "swapMomentsPerMatch": 1
   },
   {
     "present": 6,
@@ -60,11 +78,20 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
   {
     "present": 6,
     "onField": 5,
-    "matchMin": 20,
-    "intervalMin": 5,
+    "matchMin": 15,
+    "intervalMin": 8,
     "swapsPerSub": 1,
-    "differenceMin": 0,
-    "swapMomentsPerMatch": 3
+    "differenceMin": 1,
+    "swapMomentsPerMatch": 1
+  },
+  {
+    "present": 6,
+    "onField": 5,
+    "matchMin": 20,
+    "intervalMin": 8,
+    "swapsPerSub": 1,
+    "differenceMin": 4,
+    "swapMomentsPerMatch": 2
   },
   {
     "present": 6,
@@ -83,6 +110,15 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "swapsPerSub": 1,
     "differenceMin": 2,
     "swapMomentsPerMatch": 5
+  },
+  {
+    "present": 7,
+    "onField": 4,
+    "matchMin": 15,
+    "intervalMin": 5,
+    "swapsPerSub": 3,
+    "differenceMin": 3,
+    "swapMomentsPerMatch": 2
   },
   {
     "present": 7,
@@ -110,6 +146,15 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "swapsPerSub": 2,
     "differenceMin": 2,
     "swapMomentsPerMatch": 6
+  },
+  {
+    "present": 7,
+    "onField": 5,
+    "matchMin": 15,
+    "intervalMin": 6,
+    "swapsPerSub": 1,
+    "differenceMin": 6,
+    "swapMomentsPerMatch": 1
   },
   {
     "present": 7,
@@ -141,6 +186,15 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
   {
     "present": 7,
     "onField": 6,
+    "matchMin": 15,
+    "intervalMin": 5,
+    "swapsPerSub": 1,
+    "differenceMin": 4,
+    "swapMomentsPerMatch": 2
+  },
+  {
+    "present": 7,
+    "onField": 6,
     "matchMin": 20,
     "intervalMin": 8,
     "swapsPerSub": 1,
@@ -151,10 +205,10 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "present": 7,
     "onField": 6,
     "matchMin": 30,
-    "intervalMin": 7,
+    "intervalMin": 8,
     "swapsPerSub": 1,
-    "differenceMin": 5,
-    "swapMomentsPerMatch": 4
+    "differenceMin": 8,
+    "swapMomentsPerMatch": 3
   },
   {
     "present": 7,
@@ -168,11 +222,20 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
   {
     "present": 8,
     "onField": 4,
+    "matchMin": 15,
+    "intervalMin": 8,
+    "swapsPerSub": 4,
+    "differenceMin": 1,
+    "swapMomentsPerMatch": 1
+  },
+  {
+    "present": 8,
+    "onField": 4,
     "matchMin": 20,
     "intervalMin": 5,
-    "swapsPerSub": 2,
+    "swapsPerSub": 4,
     "differenceMin": 0,
-    "swapMomentsPerMatch": 3
+    "swapMomentsPerMatch": 2
   },
   {
     "present": 8,
@@ -191,6 +254,15 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "swapsPerSub": 4,
     "differenceMin": 2,
     "swapMomentsPerMatch": 5
+  },
+  {
+    "present": 8,
+    "onField": 5,
+    "matchMin": 15,
+    "intervalMin": 6,
+    "swapsPerSub": 1,
+    "differenceMin": 6,
+    "swapMomentsPerMatch": 1
   },
   {
     "present": 8,
@@ -214,19 +286,28 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "present": 8,
     "onField": 5,
     "matchMin": 40,
-    "intervalMin": 5,
-    "swapsPerSub": 1,
-    "differenceMin": 0,
-    "swapMomentsPerMatch": 7
+    "intervalMin": 7,
+    "swapsPerSub": 2,
+    "differenceMin": 5,
+    "swapMomentsPerMatch": 5
+  },
+  {
+    "present": 8,
+    "onField": 6,
+    "matchMin": 15,
+    "intervalMin": 6,
+    "swapsPerSub": 2,
+    "differenceMin": 6,
+    "swapMomentsPerMatch": 1
   },
   {
     "present": 8,
     "onField": 6,
     "matchMin": 20,
-    "intervalMin": 5,
+    "intervalMin": 8,
     "swapsPerSub": 2,
-    "differenceMin": 0,
-    "swapMomentsPerMatch": 3
+    "differenceMin": 4,
+    "swapMomentsPerMatch": 2
   },
   {
     "present": 8,
@@ -242,7 +323,7 @@ export const ROTATION_TEMPLATES: readonly RotationTemplate[] = [
     "onField": 6,
     "matchMin": 40,
     "intervalMin": 5,
-    "swapsPerSub": 1,
+    "swapsPerSub": 2,
     "differenceMin": 0,
     "swapMomentsPerMatch": 7
   }

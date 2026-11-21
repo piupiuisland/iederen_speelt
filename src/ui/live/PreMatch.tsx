@@ -11,7 +11,7 @@ import {
 import { recommendStartingLineup } from "../../domain/engine/lineup.ts";
 import { rotationTemplate } from "../../domain/engine/rotation.ts";
 import { replay } from "../../domain/projection.ts";
-import { MINUTE } from "../../domain/settings.ts";
+import { MINUTE, plannedSubTimes } from "../../domain/settings.ts";
 import { primeAudio } from "../../platform/device.ts";
 import { useReadyStore } from "../../store/AppStore.tsx";
 import { Chips, FIELD_SIZES, MATCH_LENGTHS } from "../components/Chips.tsx";
@@ -152,6 +152,14 @@ export function PreMatch({ matchId }: { matchId: string }) {
               max={bench}
               onChange={(v) => setCustom({ intervalMin: rotation.intervalMin, swaps: v })}
             />
+            <p className="mb-2 text-sm text-gray-700">
+              {(() => {
+                const times = plannedSubTimes(minutes * MINUTE, rotation.intervalMin * MINUTE);
+                return times.length === 0
+                  ? "No swap moment fits in this match (first after 6 min, none in the last 4 min)."
+                  : `Swaps at ${times.map((t) => `${t / MINUTE}′`).join(" · ")}`;
+              })()}
+            </p>
             {template && (
               <div className={`mb-2 flex items-start gap-2 rounded-xl p-3 text-sm ${isTemplate ? "bg-green-50 text-green-900" : "bg-gray-50 text-gray-700"}`}>
                 <Sparkles size={16} className="mt-0.5 shrink-0" />

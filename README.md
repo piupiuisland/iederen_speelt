@@ -30,7 +30,8 @@ without a tap:
 
 1. A child marked injured / resting / gone home who is still on the field comes off first.
 2. Empty places on the field are filled.
-3. Otherwise, at each reminder: children who have been on for at least 3 minutes
+3. Otherwise, at each reminder (the first after at least 6 minutes, then every
+   few minutes, never in the last 4 minutes of a match): children who have been on for at least 3 minutes
    are candidates to come off (longest playing time today first); the bench child
    with the least playing time today comes on. A swap is skipped if the incoming
    child has already played more than the outgoing one, and no rotation is

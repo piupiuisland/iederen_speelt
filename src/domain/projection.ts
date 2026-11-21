@@ -1,4 +1,5 @@
 import { activeMsBetween, runningIntervals, totalActiveMs } from "./time.ts";
+import { FIRST_SUB_AFTER_MS, NO_SUB_IN_LAST_MS } from "./settings.ts";
 import type { Availability, Match, MatchDay, Ms, PlayerId, Settings, SubEvent } from "./types.ts";
 
 export type MatchStatus = "ready" | "running" | "paused" | "finished";
@@ -230,9 +231,10 @@ function replayMatch(
   for (const p of players) p.onField = on.has(p.playerId);
 
   // Reminder clock: counts active time since the last anchor (start, sub, skip, snooze).
+  // The first swap waits at least FIRST_SUB_AFTER_MS; none is due in the last NO_SUB_IN_LAST_MS.
   let anchorT = start.t;
   const interval = intervalOf(match, settings);
-  let dueAfter = interval;
+  let dueAfter = Math.max(interval, FIRST_SUB_AFTER_MS);
   for (const e of match.events) {
     if (e.type === "SUB" && effectiveBatches.has(e.batchId)) {
       anchorT = e.t;
@@ -243,7 +245,9 @@ function replayMatch(
     }
   }
   const live = status === "running" || status === "paused";
-  const nextReminderInMs = live ? dueAfter - activeMsBetween(intervals, anchorT, nowMs) : null;
+  const sinceAnchor = activeMsBetween(intervals, anchorT, nowMs);
+  const dueAtElapsed = activeMsBetween(intervals, start.t, anchorT) + dueAfter;
+  const nextReminderInMs = live && planned - dueAtElapsed >= NO_SUB_IN_LAST_MS ? dueAfter - sinceAnchor : null;
 
   const elapsedMs = totalActiveMs(intervals);
   return {

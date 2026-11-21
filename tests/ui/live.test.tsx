@@ -150,7 +150,7 @@ describe("live match", () => {
   });
 
   it("shows the suggestion when a sub is due and applies it in one tap", async () => {
-    const { user } = await renderApp(await seedRunningMatch(5));
+    const { user } = await renderApp(await seedRunningMatch(7));
     expect(screen.getByText("Sub time!")).toBeInTheDocument();
     const box = screen.getByLabelText("Suggested substitutions");
     expect(box).toHaveTextContent("Ava");
