@@ -97,7 +97,10 @@ const intervalOf = (match: Match, settings: Settings): Ms => match.reminderInter
 
 export function scoreOf(match: Match): Score {
   const score = { us: 0, them: 0 };
-  for (const e of match.events) if (e.type === "GOAL") score[e.side] = Math.max(0, score[e.side] + e.delta);
+  for (const e of match.events) {
+    if (e.type === "GOAL") score[e.side] = Math.max(0, score[e.side] + e.delta);
+    else if (e.type === "SCORE_SET") Object.assign(score, { us: e.us, them: e.them });
+  }
   return score;
 }
 

@@ -7,7 +7,8 @@ import { teamNameOf } from "../../domain/roster.ts";
 import { useReadyStore } from "../../store/AppStore.tsx";
 import { formatDate } from "../../store/prefs.ts";
 import { ErrorText } from "../components/ErrorText.tsx";
-import { OPPONENT_FALLBACK, short } from "../format.ts";
+import { ResultRow } from "../components/ResultRow.tsx";
+import { short } from "../format.ts";
 import { LiveMatch } from "../live/LiveMatch.tsx";
 import { PreMatch } from "../live/PreMatch.tsx";
 
@@ -40,14 +41,14 @@ function BetweenMatches() {
         <div className="space-y-1.5">
           <h2 className="text-xs font-bold tracking-wider text-gray-500 uppercase">Results</h2>
           {finished.map((m) => (
-            <div key={m.matchId} className="flex items-center justify-between rounded-xl bg-gray-900 px-4 py-2.5 text-white">
-              <span className="w-6 text-sm text-gray-400">{m.number}</span>
-              <span className="flex-1 truncate px-3 text-right text-sm font-semibold">{teamNameOf(data.roster)}</span>
-              <span aria-label={`Match ${m.number} score`} className="text-xl font-black tabular-nums">
-                {m.score.us} : {m.score.them}
-              </span>
-              <span className="flex-1 truncate px-3 text-sm font-semibold">{m.opponentName || OPPONENT_FALLBACK}</span>
-            </div>
+            <ResultRow
+              key={m.matchId}
+              number={m.number}
+              teamName={teamNameOf(data.roster)}
+              opponentName={m.opponentName}
+              score={m.score}
+              onSave={(score) => actions.editScore(day.id, m.matchId, score)}
+            />
           ))}
         </div>
       )}

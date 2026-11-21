@@ -103,3 +103,36 @@ describe("deleting a match day", () => {
     expect(rows()).toHaveLength(1);
   });
 });
+
+describe("editing a score", () => {
+  it("corrects a result between matches and after the day has ended", async () => {
+    const { user, dbName, unmount } = await renderApp();
+    await startDay(user);
+    await playMatch(user, 1);
+    await screen.findByRole("heading", { name: "Match 2 of 4" });
+    expect(screen.getByLabelText("Match 1 score")).toHaveTextContent("1 : 0");
+
+    await user.click(screen.getByRole("button", { name: "Edit score of match 1" }));
+    await user.click(screen.getByRole("button", { name: "Best Vooruit one goal more" }));
+    await user.click(screen.getByRole("button", { name: "Tegenstander one goal more" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByLabelText("Match 1 score")).toHaveTextContent("2 : 1");
+
+    await user.click(screen.getByRole("button", { name: "End match day" }));
+    await user.click(screen.getByRole("button", { name: "Yes, end match day" }));
+    await screen.findByRole("heading", { name: "Match day summary" });
+    await user.click(screen.getByRole("button", { name: "Edit score of match 1" }));
+    await user.click(screen.getByRole("button", { name: "Best Vooruit one goal less" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByLabelText("Match 1 score")).toHaveTextContent("1 : 1");
+    const tiles = screen.getByText("Matches").closest("dl")!;
+    expect(within(tiles).getByText("Goals").nextSibling).toHaveTextContent("1:1");
+
+    // Saved: still corrected after a reload.
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    unmount();
+    const again = await renderApp(dbName);
+    await again.user.click(screen.getByRole("button", { name: /1 match/ }));
+    expect(await screen.findByLabelText("Match 1 score")).toHaveTextContent("1 : 1");
+  });
+});

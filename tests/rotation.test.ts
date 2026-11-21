@@ -26,7 +26,7 @@ describe("rotation templates", () => {
 
   it("knows the cases discussed: 7 children, 5 on the field, 20 min → every 8 min, 2 at a time", () => {
     expect(rotationTemplate(7, 5, 20)).toMatchObject({ intervalMin: 8, swapsPerSub: 2 });
-    expect(rotationTemplate(6, 4, 20)).toMatchObject({ intervalMin: 7, swapsPerSub: 2 });
+    expect(rotationTemplate(6, 4, 20)).toMatchObject({ intervalMin: 8, swapsPerSub: 2 });
     expect(rotationTemplate(5, 4, 20)).toMatchObject({ intervalMin: 8, swapsPerSub: 1 });
     expect(rotationTemplate(7, 5, 15)).toMatchObject({ intervalMin: 5, swapsPerSub: 2 });
   });

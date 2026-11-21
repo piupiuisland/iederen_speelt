@@ -84,6 +84,8 @@ export type DurationChangeEvent = EventBase & { type: "DURATION_CHANGE"; planned
 export type ReminderEvent = EventBase & { type: "REMINDER"; action: "skip" | "snooze" };
 /** A goal (+1) or a correction (−1) for one side. */
 export type GoalEvent = EventBase & { type: "GOAL"; side: "us" | "them"; delta: 1 | -1 };
+/** Sets the score outright (a correction after the match, e.g. a goal was missed). */
+export type ScoreSetEvent = EventBase & { type: "SCORE_SET"; us: number; them: number };
 /** Marks [fromT, toT] as not played (e.g. the app was closed and the match was actually stopped). */
 export type GapCorrectionEvent = EventBase & { type: "GAP_CORRECTION"; fromT: number; toT: number };
 
@@ -97,6 +99,7 @@ export type MatchEvent =
   | DurationChangeEvent
   | ReminderEvent
   | GoalEvent
+  | ScoreSetEvent
   | GapCorrectionEvent;
 
 /** An event before id/t are assigned. */

@@ -5,7 +5,8 @@ import { teamNameOf } from "../../domain/roster.ts";
 import { MINUTE } from "../../domain/settings.ts";
 import { useReadyStore } from "../../store/AppStore.tsx";
 import { formatDate } from "../../store/prefs.ts";
-import { OPPONENT_FALLBACK, short } from "../format.ts";
+import { ResultRow } from "../components/ResultRow.tsx";
+import { short } from "../format.ts";
 
 const signed = (ms: number) => `${ms >= 0 ? "+" : "−"}${short(Math.abs(ms))}`;
 
@@ -52,14 +53,14 @@ export function SummaryScreen({ dayId }: { dayId: string }) {
         <div className="space-y-1.5">
           <h2 className="text-xs font-bold tracking-wider text-gray-500 uppercase">Results</h2>
           {summary.results.map((m) => (
-            <div key={m.number} className="flex items-center rounded-xl bg-gray-900 px-4 py-2.5 text-white">
-              <span className="w-8 text-sm text-gray-400">{m.number}</span>
-              <span className="flex-1 truncate pr-3 text-right text-sm font-semibold">{teamNameOf(data.roster)}</span>
-              <span className="text-xl font-black tabular-nums">
-                {m.score.us} : {m.score.them}
-              </span>
-              <span className="flex-1 truncate pl-3 text-sm font-semibold">{m.opponentName || OPPONENT_FALLBACK}</span>
-            </div>
+            <ResultRow
+              key={m.matchId}
+              number={m.number}
+              teamName={teamNameOf(data.roster)}
+              opponentName={m.opponentName}
+              score={m.score}
+              onSave={(score) => actions.editScore(day.id, m.matchId, score)}
+            />
           ))}
         </div>
       )}

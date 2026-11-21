@@ -5,6 +5,7 @@ import {
   DomainError,
   finishMatchDay,
   heartbeat,
+  setScore,
   type Ctx,
   type Interruption,
 } from "../domain/commands.ts";
@@ -51,6 +52,8 @@ export interface AppActions {
   closeSummary(): void;
   /** Permanently remove a finished match day from history (e.g. a test run). */
   deleteMatchDay(dayId: string): void;
+  /** Correct a match's score — today's or one from a finished match day. */
+  editScore(dayId: string, matchId: string, score: { us: number; them: number }): string | null;
   /** Don't count the interruption as playing time. */
   excludeInterruption(): string | null;
   startMatchDay(input: { absentIds: ReadonlySet<PlayerId>; prefs: SetupPrefs; date: string }): string | null;
@@ -224,6 +227,23 @@ export function AppStoreProvider({
           },
           (repo) => repo.deleteMatchDay(dayId),
         );
+      },
+
+      editScore(dayId, matchId, score) {
+        const d = current();
+        const ctx = { now: Date.now() };
+        if (d.activeDay?.id === dayId) {
+          const r = attempt(() => setScore(d.activeDay!, matchId, score, ctx));
+          if (!r.ok) return r.error;
+          commit({ ...d, activeDay: r.value }, (repo) => repo.saveMatchDay(r.value));
+          return null;
+        }
+        const old = d.history.find((h) => h.id === dayId);
+        if (!old) return "Unknown match day.";
+        const r = attempt(() => setScore(old, matchId, score, ctx));
+        if (!r.ok) return r.error;
+        commit({ ...d, history: d.history.map((h) => (h.id === dayId ? r.value : h)) }, (repo) => repo.saveMatchDay(r.value));
+        return null;
       },
 
       excludeInterruption() {

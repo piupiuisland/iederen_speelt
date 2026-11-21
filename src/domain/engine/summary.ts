@@ -3,6 +3,7 @@ import type { Availability, MatchDay, Ms, PlayerId } from "../types.ts";
 import { fairnessIndicators, type FairnessIndicators } from "./fairness.ts";
 
 export interface MatchResult {
+  matchId: string;
   number: number;
   opponentName: string;
   score: Score;
@@ -48,6 +49,7 @@ export function summarizeMatchDay(day: MatchDay, nowMs: number = day.finishedAt 
     goals: played.reduce((g, m) => ({ us: g.us + m.score.us, them: g.them + m.score.them }), { us: 0, them: 0 }),
     substitutions: played.reduce((n, m) => n + m.substitutionCount, 0),
     results: played.map((m) => ({
+      matchId: m.matchId,
       number: m.number,
       opponentName: m.opponentName,
       score: m.score,

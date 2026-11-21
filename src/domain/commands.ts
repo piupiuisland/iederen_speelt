@@ -215,6 +215,21 @@ export function recordGoal(day: MatchDay, matchId: string, side: "us" | "them", 
   return appendEvents(day, matchId, ctx, [{ type: "GOAL", side, delta }]);
 }
 
+/**
+ * Correct the score of a started or finished match. Also allowed after the
+ * match day has ended: the score does not affect playing time.
+ */
+export function setScore(day: MatchDay, matchId: string, score: { us: number; them: number }, ctx: Ctx): MatchDay {
+  const match = findMatch(day, matchId);
+  if (matchStatus(match) === "ready") fail("The match has not started.");
+  for (const v of [score.us, score.them]) if (!Number.isInteger(v) || v < 0 || v > 99) fail("A score must be 0–99.");
+  const { us, them } = scoreOf(match);
+  if (us === score.us && them === score.them) return day;
+  const updated = appendEvents(day, matchId, ctx, [{ type: "SCORE_SET", us: score.us, them: score.them }]);
+  // Don't let an edit afterwards look like activity on the day (interruption detection).
+  return { ...updated, lastSeenMs: day.finishedAt !== undefined ? day.lastSeenMs : updated.lastSeenMs };
+}
+
 export function setAvailability(day: MatchDay, playerId: PlayerId, status: Availability, ctx: Ctx): MatchDay {
   ensureOpen(day);
   if (!day.playerIds.includes(playerId)) fail(`Player ${playerId} is not taking part today.`);
